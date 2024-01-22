@@ -7,9 +7,12 @@ THIS HERE IS THE CODE TO SEND APPS SENSOR DATA TO OUR MOTOR CONTROLLER VIA CAN
 IT ALSO SENDS THE DATA TO THE DASH DISPLAY
 */
 
-
-CAN can(D10, D2);
 AnalogIn analogIn(A0);
+
+//Native CAN 
+CAN can(D10, D2);
+//Custom CANStack handle
+CANOpenNode canHandle(can, 0x1);
 
 int voltage; //HE sensor input calculated
 
@@ -40,13 +43,12 @@ void handleTPDO() {
         }
         printf("\n");
 
-        TPDOqueue.call(&CANOpenNode::decodeTPDO, msg);
+        TPDOqueue.call(&CANOpenNode::decodeTPDO, msg, canHandle);
     }
 }
 
 int main() {
-    //Create Node 
-    CANOpenNode canHandle(can, 0x1);
+
 
     //Separate thread handles received messages
     eventDispatcher.start(callback(&TPDOqueue, &EventQueue::dispatch_forever));

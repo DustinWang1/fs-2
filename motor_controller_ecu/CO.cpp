@@ -37,10 +37,41 @@ void CANOpenNode::sendRPDOs(AnalogIn& analogIn) {
     sendMaxCurrents();
 }
 
-void CANOpenNode::decodeTPDO(CANMessage message) {
+void CANOpenNode::decodeTPDO(CANMessage message, CANOpenNode &canHandle) {
     //check id
+    switch(message.id) {
+        case 0x481:
+            handleTorqueSpeed(message.data, canHandle);
+            break;
+        case 0x681:
+            handleTemperature(message.data, canHandle);
+            break;
+    }
     //switch between RPDOS
     //decode for each one
 }
 
+
+
+void CANOpenNode::handleTorqueSpeed(unsigned char data[8], CANOpenNode &canHandle) {
+    canHandle.speed = static_cast<uint16_t>(static_cast<uint8_t>(data[0])) |
+                     (static_cast<uint16_t>(static_cast<uint8_t>(data[1])) << 8);
+    canHandle.torque = static_cast<uint16_t>(static_cast<uint8_t>(data[2])) |
+                     (static_cast<uint16_t>(static_cast<uint8_t>(data[3])) << 8);
+    canHandle.utilValues[0] = data[4];
+    canHandle.utilValues[1] = data[5];
+    canHandle.MotorFlags =  canHandle.torque = static_cast<uint16_t>(static_cast<uint8_t>(data[6])) |
+                     (static_cast<uint16_t>(static_cast<uint8_t>(data[7])) << 8);
+}
+
+void CANOpenNode::handleTemperature(unsigned char data[8], CANOpenNode &canHandle) {
+    canHandle.MotorTemperature = static_cast<uint8_t>(data[0]);
+    canHandle.ControllerTemperature = static_cast<uint8_t>(data[1]);
+    canHandle.DC_Bus_V = static_cast<uint16_t>(static_cast<uint8_t>(data[2])) |
+                     (static_cast<uint16_t>(static_cast<uint8_t>(data[3])) << 8);
+    canHandle.FaultCode = static_cast<uint8_t>(data[4]);
+    canHandle.FaultLevel = static_cast<uint8_t>(data[5]);
+    canHandle.BusCurrent = static_cast<uint16_t>(static_cast<uint8_t>(data[6])) |
+                     (static_cast<uint16_t>(static_cast<uint8_t>(data[7])) << 8);
+}
 
