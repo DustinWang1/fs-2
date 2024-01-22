@@ -13,6 +13,8 @@ AnalogIn analogIn(A0);
 
 int voltage; //HE sensor input calculated
 
+EventQueue TPDOqueue(64+11);
+
 Thread eventDispatcher;
 Thread RPDOsend;
 
@@ -27,16 +29,35 @@ void printCharArrayAsBinary(char* charArray, int size) {
   std::cout << std::endl;
 }
 */
+void handleTPDO() {
+    // Read the CAN message
+    CANMessage msg;
+    if (can.read(msg)) {
+        // Example: Print the received message
+        printf("Received CAN message ID: 0x%X, Length: %d, Data: ", msg.id, msg.len);
+        for (int i = 0; i < msg.len; i++) {
+            printf("%02X ", msg.data[i]);
+        }
+        printf("\n");
+
+        TPDOqueue.call(&CANOpenNode::decodeTPDO, msg);
+    }
+}
 
 int main() {
     //Create Node 
     CANOpenNode canHandle(can, 0x1);
 
     //Separate thread handles received messages
-    eventDispatcher.start(callback(&canHandle.TPDOqueue, &EventQueue::dispatch_forever));
+    eventDispatcher.start(callback(&TPDOqueue, &EventQueue::dispatch_forever));
 
+    can.attach(&handleTPDO, CAN::RxIrq);
     while(1) {
         canHandle.sendRPDOs(analogIn);
         wait_us(10000);
     }
 }
+
+
+
+

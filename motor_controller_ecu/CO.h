@@ -7,7 +7,6 @@ public:
 
     CANOpenNode(CAN& canInterface, uint8_t nodeId);
 
-    EventQueue TPDOqueue;
     //All RPDO params
     const unsigned int THROTTLE_DEMAND_COB_ID = 0x186;
     const unsigned int MAX_CURRENTS_COD_ID = 0x286;
@@ -39,8 +38,7 @@ public:
     void sendThrottleDemand();
     void sendMaxCurrents();
     void sendRPDOs(AnalogIn& analogIn);
-    void decodeTPDO(CANMessage message);
-    void handleTPDO();
+    static void decodeTPDO(CANMessage message);
 
 private:
     // CAN hardware interface

@@ -3,8 +3,8 @@
 #include <cstdint>
 
 
-CANOpenNode::CANOpenNode(CAN& canInterface, uint8_t nodeId) : can(canInterface), nodeId(nodeId), TPDOqueue(64+11) {
-    canInterface.attach(callback(this, &CANOpenNode::handleTPDO), CAN::RxIrq);
+CANOpenNode::CANOpenNode(CAN& canInterface, uint8_t nodeId) : can(canInterface), nodeId(nodeId) {
+ 
 }
 
 void CANOpenNode::sendThrottleDemand() {
@@ -41,21 +41,6 @@ void CANOpenNode::decodeTPDO(CANMessage message) {
     //check id
     //switch between RPDOS
     //decode for each one
-}
-
-void CANOpenNode::handleTPDO() {
-    // Read the CAN message
-    CANMessage msg;
-    if (can.read(msg)) {
-        // Example: Print the received message
-        printf("Received CAN message ID: 0x%X, Length: %d, Data: ", msg.id, msg.len);
-        for (int i = 0; i < msg.len; i++) {
-            printf("%02X ", msg.data[i]);
-        }
-        printf("\n");
-
-        TPDOqueue.call(&CANOpenNode::decodeTPDO, msg);
-    }
 }
 
 
