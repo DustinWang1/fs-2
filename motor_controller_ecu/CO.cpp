@@ -3,11 +3,11 @@
 #include <cstdint>
 
 
-CANOpenNode::CANOpenNode(CAN& canInterface, uint8_t nodeId) : can(canInterface), nodeId(nodeId) {
+CANOpenNode::CANOpenNode(CAN *canInterface, uint8_t nodeId) : can(canInterface), nodeId(nodeId) {
  
 }
 
-void CANOpenNode::sendThrottleDemand() {
+CANMessage CANOpenNode::sendThrottleDemand() {
     char nah[6];
     nah[0] = (torqueDemand & 0xFF00) >> 8;
     nah[1] = (torqueDemand & 0x00FF);
@@ -16,10 +16,10 @@ void CANOpenNode::sendThrottleDemand() {
     nah[4] = ((powerReady | 0x00) << 3) | ((reverseState | 0x00) << 1) | (forwardState | 0x00);
     nah[5] = MBB_alive;
 
-    can.write(CANMessage(THROTTLE_DEMAND_COB_ID, nah));
+    return CANMessage(THROTTLE_DEMAND_COB_ID, nah);
 }
 
-void CANOpenNode::sendMaxCurrents() {
+CANMessage CANOpenNode::sendMaxCurrents() {
     //same method as the last one
     char nah[4];
     nah[0] = (chargeCurrentLimit & 0xFF00) >> 8;
@@ -27,14 +27,17 @@ void CANOpenNode::sendMaxCurrents() {
     nah[2] = (dischargeCurrentLimit & 0xFF00) >> 8;
     nah[3] = (dischargeCurrentLimit & 0x00FF);
 
-    can.write(CANMessage(MAX_CURRENTS_COD_ID, nah));
+    return CANMessage(MAX_CURRENTS_COD_ID, nah);
 }
 
-void CANOpenNode::sendRPDOs(AnalogIn& analogIn) {
-    unsigned int voltage = analogIn.read() * 3.6 * 100;
-    printf("voltage: %u\n", voltage);
-    sendThrottleDemand();
-    sendMaxCurrents();
+void CANOpenNode::sendRPDOs(AnalogIn& HE1, AnalogIn& HE2) {
+    unsigned int voltage1 = HE1.read() * 3.6 * 100;
+    unsigned int voltage2 = HE2.read() * 3.6 * 100;
+    printf("voltage: %u\n", voltage1);
+    printf("voltage: %u\n", voltage1);
+    //TODO set torqueDemand based on angle
+    can->write(sendThrottleDemand());
+    can->write(sendMaxCurrents());
 }
 
 void CANOpenNode::decodeTPDO(CANMessage message, CANOpenNode &canHandle) {
@@ -50,8 +53,6 @@ void CANOpenNode::decodeTPDO(CANMessage message, CANOpenNode &canHandle) {
     //switch between RPDOS
     //decode for each one
 }
-
-
 
 void CANOpenNode::handleTorqueSpeed(unsigned char data[8], CANOpenNode &canHandle) {
     canHandle.speed = static_cast<uint16_t>(static_cast<uint8_t>(data[0])) |
@@ -74,4 +75,6 @@ void CANOpenNode::handleTemperature(unsigned char data[8], CANOpenNode &canHandl
     canHandle.BusCurrent = static_cast<uint16_t>(static_cast<uint8_t>(data[6])) |
                      (static_cast<uint16_t>(static_cast<uint8_t>(data[7])) << 8);
 }
+
+
 

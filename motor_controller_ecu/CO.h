@@ -5,7 +5,9 @@ public:
 
     const int CAN_MESSAGE_MAX_SIZE = 11+64;
 
-    CANOpenNode(CAN& canInterface, uint8_t nodeId);
+    CANOpenNode(CAN *canInterface, uint8_t nodeId);
+
+    CANOpenNode(uint8_t nodeId);
 
     //All RPDO params
     const unsigned int THROTTLE_DEMAND_COB_ID = 0x186;
@@ -69,16 +71,16 @@ public:
     /*
     Utility Functions
     */
-    void sendThrottleDemand();
-    void sendMaxCurrents();
-    void sendRPDOs(AnalogIn& analogIn);
+    CANMessage sendThrottleDemand();
+    CANMessage sendMaxCurrents();
+    void sendRPDOs(AnalogIn& HE1, AnalogIn& HE2);
     static void handleTorqueSpeed(unsigned char data[8], CANOpenNode &canHandle);
     static void handleTemperature(unsigned char data[8], CANOpenNode &canHandle);
     static void decodeTPDO(CANMessage message, CANOpenNode &canHandle);
 
 private:
     // CAN hardware interface
-    CAN& can;
+    CAN *can;
 
     // CANopen Node ID
     uint8_t nodeId;
