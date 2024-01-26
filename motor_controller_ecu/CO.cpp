@@ -31,8 +31,8 @@ CANMessage CANOpenNode::sendMaxCurrents() {
 }
 
 void CANOpenNode::sendRPDOs(AnalogIn& HE1, AnalogIn& HE2) {
-    unsigned int voltage1 = HE1.read() * 3.6 * 100;
-    unsigned int voltage2 = HE2.read() * 3.6 * 100;
+    unsigned int voltage1 = HE1.read() * 100;
+    unsigned int voltage2 = HE2.read() * 100;
     printf("voltage: %u\n", voltage1);
     printf("voltage: %u\n", voltage1);
     //TODO set torqueDemand based on angle

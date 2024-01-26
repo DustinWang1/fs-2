@@ -62,12 +62,14 @@ void initIO() {
 }
 
 int main() {  
+    initIO();
+    
     AnalogIn HE1(A0);
     AnalogIn HE2(A1);
 
     can->reset();
     can->mode(CAN::Normal);
-    initIO();
+    
 
     //Separate thread handles received messages
     //eventDispatcher.start(callback(&TPDOqueue, &EventQueue::dispatch_forever));
