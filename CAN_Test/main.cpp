@@ -13,7 +13,7 @@ char voltage = 0;
 
 bool board1 = false; // true if sending board, false if recieving board
 
-EventQueue queue(4*EVENTS_EVENT_SIZE); // creates an eventqueue which is thread and ISR safe. EVENTS_EVENT_SIZE is the size of the buffar allocated
+EventQueue queue(4*EVENTS_EVENT_SIZE); // creates an eventqueue which is thread and ISR safe. EVENTS_EVENT_SIZE is the size of the buffer allocated
 
 void send()
 {
