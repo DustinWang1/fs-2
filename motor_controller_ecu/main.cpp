@@ -70,13 +70,19 @@ void RxErrorCall(std::chrono::microseconds errorTime) {
 }
 
 void sendCANMessage() {
-    char data[1];
-    data[0] = 'A';
-
-    can->write(CANMessage(1337, data, 1));
-
     auto durationSeconds = std::chrono::duration_cast<std::chrono::seconds>(TotalRunTime.elapsed_time());
     auto remainingMicros = TotalRunTime.elapsed_time() - std::chrono::duration_cast<std::chrono::microseconds>(durationSeconds);
     auto durationMilliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(remainingMicros);
-    printf("Sent Message at %lld seconds %lld milliseconds\n", durationSeconds.count(), durationMilliseconds.count());
+
+    char data[1];
+    data[0] = 'A';
+
+    bool worked = can->write(CANMessage(1337, data, 1));
+
+    if(worked) {
+            printf("Success Sent Message at %lld seconds %lld milliseconds\n", durationSeconds.count(), durationMilliseconds.count());
+    } else {
+            printf("Message Error at %lld seconds %lld milliseconds\n", durationSeconds.count(), durationMilliseconds.count());
+    }
+    
 }
